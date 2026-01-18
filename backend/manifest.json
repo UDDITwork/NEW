@@ -1,0 +1,36 @@
+{
+  "format": 1,
+  "developer": {
+    "name": "PRABHAT",
+    "identifier": "prabhat"
+  },
+  "application": {
+    "type": "stream",
+    "key": "prabhat.chemical-saver.stream",
+    "visibility": "private",
+    "name": "Chemical Saver",
+    "category": "analytics",
+    "segments": ["production"],
+    "description": "Optimizes chemical injection rates based on water cut and flow rates to prevent corrosion while reducing spend."
+  },
+  "settings": {
+    "entrypoint": {
+      "file": "lambda_function.py",
+      "function": "lambda_handler"
+    },
+    "environment": {},
+    "runtime": "python3.9"
+  },
+  "datasets": {
+    "inputs": {
+      "production.fluids": {
+        "channels": ["gross_fluid_rate", "water_cut", "current_injection_rate"]
+      }
+    },
+    "outputs": {
+      "chemical.optimization.results": {
+        "channels": ["recommended_rate_gpd", "actual_rate_gpd", "savings_opportunity_usd", "status_flag", "water_bpd", "current_ppm"]
+      }
+    }
+  }
+}

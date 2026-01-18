@@ -1,0 +1,87 @@
+{
+  "application": {
+    "name": "Chemical Saver",
+    "key": "chemical-saver",
+    "version": "1.0.0",
+    "description": "Dosage optimization app that calculates optimal chemical injection rates based on real-time production data and visualizes financial savings vs. waste.",
+    "category": "optimization",
+    "provider": "custom",
+    "type": "stream",
+    "environment": "production"
+  },
+  "backend": {
+    "type": "stream",
+    "runtime": "python3.9",
+    "handler": "lambda_function.lambda_handler",
+    "timeout": 30,
+    "memory": 256,
+    "schedule": {
+      "type": "data-time-based",
+      "interval": 60
+    },
+    "inputs": [
+      {
+        "collection": "production.fluids",
+        "fields": [
+          "timestamp",
+          "gross_fluid_rate",
+          "water_cut",
+          "current_injection_rate"
+        ]
+      },
+      {
+        "collection": "wits",
+        "fields": [
+          "timestamp",
+          "flow_rate"
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "collection": "chemical.optimization.results",
+        "fields": [
+          "timestamp",
+          "recommended_rate_gpd",
+          "actual_rate_gpd",
+          "savings_opportunity_usd",
+          "status_flag",
+          "water_bpd",
+          "current_ppm",
+          "target_ppm"
+        ]
+      }
+    ]
+  },
+  "frontend": {
+    "type": "react",
+    "entry": "ui/src/App.js",
+    "settings": {
+      "collection": "chemical.saver.settings",
+      "fields": [
+        "target_ppm",
+        "chemical_density",
+        "active_intensity",
+        "cost_per_gallon",
+        "min_pump_rate",
+        "max_pump_rate"
+      ]
+    }
+  },
+  "datasets": [
+    {
+      "name": "chemical.optimization.results",
+      "type": "time-series",
+      "retention": "365d"
+    },
+    {
+      "name": "chemical.saver.settings",
+      "type": "document",
+      "scope": "well"
+    }
+  ],
+  "permissions": {
+    "read": ["production.fluids", "wits"],
+    "write": ["chemical.optimization.results", "chemical.saver.settings"]
+  }
+}

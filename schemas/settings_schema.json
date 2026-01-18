@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "chemical.saver.settings",
+  "title": "Chemical Saver Well Settings",
+  "description": "User-configurable settings for chemical dosage optimization per well",
+  "type": "object",
+  "required": ["asset_id"],
+  "properties": {
+    "asset_id": {
+      "type": "integer",
+      "description": "Unique identifier for the well/asset"
+    },
+    "target_ppm": {
+      "type": "integer",
+      "default": 200,
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "The required concentration of chemical in the water phase (Parts Per Million)"
+    },
+    "chemical_density": {
+      "type": "number",
+      "default": 1.0,
+      "minimum": 0.1,
+      "maximum": 5.0,
+      "description": "Density of the chemical in kg/L (used for mass-to-volume conversion)"
+    },
+    "active_intensity": {
+      "type": "number",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 100,
+      "description": "The percentage of active ingredient in the chemical drum (%)"
+    },
+    "cost_per_gallon": {
+      "type": "number",
+      "default": 25.00,
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Cost of the chemical in USD per gallon"
+    },
+    "min_pump_rate": {
+      "type": "number",
+      "default": 0.5,
+      "minimum": 0,
+      "maximum": 100,
+      "description": "The physical minimum limit of the pump in GPD (Safety constraint)"
+    },
+    "max_pump_rate": {
+      "type": "number",
+      "default": 50.0,
+      "minimum": 0.1,
+      "maximum": 1000,
+      "description": "The physical maximum limit of the pump in GPD (Safety constraint)"
+    },
+    "unit_preference": {
+      "type": "string",
+      "enum": ["gallons", "liters"],
+      "default": "gallons",
+      "description": "User preference for volume units display"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when settings were first created"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when settings were last modified"
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "User ID who last modified the settings"
+    }
+  },
+  "additionalProperties": false
+}

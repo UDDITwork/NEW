@@ -1,0 +1,134 @@
+/**
+ * Chemical Saver - Status Indicator Styles
+ */
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+}
+
+.status-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon {
+  font-size: 1.25rem;
+}
+
+.status-chip {
+  font-weight: 600;
+}
+
+.status-description {
+  color: #666;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Status Variants */
+.status-optimal {
+  border: 2px solid #4caf50;
+}
+
+.status-over {
+  border: 2px solid #f44336;
+  background-color: #fff5f5;
+}
+
+.status-under {
+  border: 2px solid #ff9800;
+  background-color: #fff8e1;
+}
+
+.status-off {
+  border: 2px solid #9e9e9e;
+  background-color: #fafafa;
+}
+
+.status-error {
+  border: 2px solid #f44336;
+  border-style: dashed;
+}
+
+.status-nodata {
+  border: 2px solid #9e9e9e;
+  border-style: dashed;
+}
+
+/* Animated Pulse for Attention States */
+.status-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 6px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-over .status-pulse {
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+.status-under .status-pulse {
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Tooltip status classes */
+.status-optimal {
+  color: #4caf50;
+}
+
+.status-over_dosing {
+  color: #f44336;
+}
+
+.status-under_dosing {
+  color: #ff9800;
+}
+
+.status-pump_off {
+  color: #9e9e9e;
+}
+
+.status-error {
+  color: #f44336;
+}
+
+.status-no_data {
+  color: #9e9e9e;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .status-indicator {
+    padding: 8px 16px;
+    width: 100%;
+    justify-content: center;
+  }
+}

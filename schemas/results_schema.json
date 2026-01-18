@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "chemical.optimization.results",
+  "title": "Chemical Optimization Results",
+  "description": "Output data from the chemical dosage optimization calculations",
+  "type": "object",
+  "required": ["timestamp", "asset_id"],
+  "properties": {
+    "asset_id": {
+      "type": "integer",
+      "description": "Unique identifier for the well/asset"
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "Unix timestamp when the data was recorded (seconds)"
+    },
+    "recommended_rate_gpd": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "The calculated optimal setpoint in Gallons Per Day"
+    },
+    "actual_rate_gpd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The original input rate from SCADA (for comparison) in GPD"
+    },
+    "savings_opportunity_usd": {
+      "type": ["number", "null"],
+      "description": "The calculated money wasted per day in USD (positive = over-dosing, negative = under-dosing)"
+    },
+    "status_flag": {
+      "type": "string",
+      "enum": ["OPTIMAL", "OVER_DOSING", "UNDER_DOSING", "PUMP_OFF", "ERROR", "NO_DATA"],
+      "description": "Current dosing status indicator"
+    },
+    "water_bpd": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Calculated water volume in Barrels Per Day"
+    },
+    "current_ppm": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Current calculated chemical concentration in PPM"
+    },
+    "target_ppm": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Target PPM from well settings"
+    },
+    "gross_fluid_rate": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Input gross fluid rate in BPD"
+    },
+    "water_cut": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Water cut percentage"
+    }
+  },
+  "additionalProperties": false
+}

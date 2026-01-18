@@ -1,0 +1,100 @@
+/**
+ * Chemical Saver - KPI Card Styles
+ */
+
+.kpi-card {
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.kpi-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.kpi-title {
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.kpi-icon {
+  font-size: 1.25rem;
+}
+
+.kpi-value {
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.kpi-subtitle {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+/* Color Variants */
+.kpi-error {
+  border-left: 4px solid #f44336;
+}
+
+.kpi-error .kpi-value {
+  color: #f44336;
+}
+
+.kpi-warning {
+  border-left: 4px solid #ff9800;
+}
+
+.kpi-warning .kpi-value {
+  color: #ff9800;
+}
+
+.kpi-success {
+  border-left: 4px solid #4caf50;
+}
+
+.kpi-success .kpi-value {
+  color: #4caf50;
+}
+
+.kpi-info {
+  border-left: 4px solid #2196f3;
+}
+
+.kpi-info .kpi-value {
+  color: #2196f3;
+}
+
+.kpi-default {
+  border-left: 4px solid #9e9e9e;
+}
+
+.kpi-default .kpi-value {
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .kpi-value {
+    font-size: 1.5rem;
+  }
+}

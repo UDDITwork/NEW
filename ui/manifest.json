@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "developer": {
+    "name": "PRABHAT",
+    "identifier": "prabhat"
+  },
+  "application": {
+    "type": "ui",
+    "key": "prabhat.chemical-saver.ui",
+    "visibility": "private",
+    "name": "Chemical Saver",
+    "category": "analytics",
+    "segments": ["production"],
+    "description": "Dashboard for chemical dosage optimization with real-time charts and KPIs.",
+    "ui": {
+      "initial_size": {
+        "w": 8,
+        "h": 12
+      },
+      "multi_rig": false,
+      "full_screen_report": false
+    }
+  },
+  "settings": {
+    "entrypoint": {
+      "file": "src/index.js",
+      "function": "handler"
+    },
+    "environment": {},
+    "runtime": "ui",
+    "app_log_type": "time"
+  },
+  "datasets": {
+    "inputs": {
+      "chemical.optimization.results": {
+        "channels": ["recommended_rate_gpd", "actual_rate_gpd", "savings_opportunity_usd", "status_flag", "water_bpd", "current_ppm"]
+      }
+    },
+    "settings": {
+      "chemical.saver.settings": {
+        "fields": ["target_ppm", "chemical_density", "active_intensity", "cost_per_gallon", "min_pump_rate", "max_pump_rate"]
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+[project]
+id = "chemical-saver"
+name = "Chemical Saver"
+version = "1.0.0"
+
+[build]
+builder = "gcr.io/buildpacks/builder:v1"
+
+[[build.env]]
+name = "GOOGLE_RUNTIME"
+value = "python"
+
+[[build.env]]
+name = "GOOGLE_RUNTIME_VERSION"
+value = "3.9"
+
+[[build.env]]
+name = "GOOGLE_ENTRYPOINT"
+value = "gunicorn --bind :$PORT --workers 1 --threads 8 backend.app:app"
