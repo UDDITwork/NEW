@@ -103,67 +103,68 @@ def demo():
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            color: #e2e8f0;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 50%, #f5f7ff 100%);
+            color: #1e293b;
             padding: 24px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
 
         /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .logo { font-size: 24px; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; }
-        .logo span { color: #3b82f6; }
-        .header-badge { background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .logo { font-size: 24px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
+        .logo span { color: #2563eb; }
+        .header-badge { background: rgba(37, 99, 235, 0.1); color: #2563eb; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid rgba(37, 99, 235, 0.2); }
 
         /* Glass Card */
         .glass {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
         }
 
         /* KPI Cards */
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
         .kpi-card { padding: 24px; position: relative; overflow: hidden; }
         .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-        .kpi-card.success::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .kpi-card.warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .kpi-card.error::before { background: linear-gradient(90deg, #ef4444, #f87171); }
-        .kpi-card.info::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 8px; font-weight: 500; }
-        .kpi-value { font-size: 32px; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
-        .kpi-card.success .kpi-value { color: #4ade80; }
-        .kpi-card.warning .kpi-value { color: #fbbf24; }
-        .kpi-card.error .kpi-value { color: #f87171; }
-        .kpi-card.info .kpi-value { color: #60a5fa; }
-        .kpi-sub { font-size: 12px; color: #64748b; }
+        .kpi-card.success::before { background: linear-gradient(90deg, #16a34a, #22c55e); }
+        .kpi-card.warning::before { background: linear-gradient(90deg, #d97706, #f59e0b); }
+        .kpi-card.error::before { background: linear-gradient(90deg, #dc2626, #ef4444); }
+        .kpi-card.info::before { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+        .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px; font-weight: 600; }
+        .kpi-value { font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+        .kpi-card.success .kpi-value { color: #16a34a; }
+        .kpi-card.warning .kpi-value { color: #d97706; }
+        .kpi-card.error .kpi-value { color: #dc2626; }
+        .kpi-card.info .kpi-value { color: #2563eb; }
+        .kpi-sub { font-size: 12px; color: #94a3b8; }
 
         /* Status Banner */
         .status-banner { padding: 20px; margin-bottom: 24px; text-align: center; }
         .status-text { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; }
-        .status-banner.optimal { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
-        .status-banner.optimal .status-text { color: #4ade80; }
-        .status-banner.over { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
-        .status-banner.over .status-text { color: #f87171; }
-        .status-banner.under { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
-        .status-banner.under .status-text { color: #fbbf24; }
-        .status-banner.off { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); }
-        .status-banner.off .status-text { color: #94a3b8; }
+        .status-banner.optimal { background: rgba(22, 163, 74, 0.08); border-color: rgba(22, 163, 74, 0.2); }
+        .status-banner.optimal .status-text { color: #16a34a; }
+        .status-banner.over { background: rgba(220, 38, 38, 0.08); border-color: rgba(220, 38, 38, 0.2); }
+        .status-banner.over .status-text { color: #dc2626; }
+        .status-banner.under { background: rgba(217, 119, 6, 0.08); border-color: rgba(217, 119, 6, 0.2); }
+        .status-banner.under .status-text { color: #d97706; }
+        .status-banner.off { background: rgba(100, 116, 139, 0.08); border-color: rgba(100, 116, 139, 0.2); }
+        .status-banner.off .status-text { color: #64748b; }
 
         /* Input Section */
         .input-section { padding: 28px; margin-bottom: 24px; }
-        .section-title { font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .section-title { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: 500; }
+        .input-group label { display: block; font-size: 12px; color: #475569; margin-bottom: 8px; font-weight: 600; }
         .input-group input {
             width: 100%; padding: 14px 16px; font-size: 16px; font-weight: 500;
-            background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px; color: #f8fafc; transition: all 0.2s;
+            background: #ffffff; border: 1px solid #e2e8f0;
+            border-radius: 10px; color: #1e293b; transition: all 0.2s;
         }
-        .input-group input:focus { outline: none; border-color: #3b82f6; background: rgba(15, 23, 42, 0.8); }
-        .input-group .unit { font-size: 11px; color: #64748b; margin-top: 6px; }
+        .input-group input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .input-group .unit { font-size: 11px; color: #94a3b8; margin-top: 6px; }
 
         /* Buttons */
         .btn-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
@@ -171,27 +172,30 @@ def demo():
             padding: 14px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px;
             cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
         }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); }
-        .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
-        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3); }
-        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); }
+        .btn-success { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(22, 163, 74, 0.25); }
+        .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
+        .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(220, 38, 38, 0.25); }
+        .btn-secondary { background: #ffffff; color: #475569; border: 1px solid #e2e8f0; }
+        .btn-secondary:hover { background: #f8fafc; }
 
         /* Summary Cards */
         .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
         .summary-card { padding: 24px; text-align: center; }
         .summary-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px; }
-        .summary-value { font-size: 28px; font-weight: 700; color: #f8fafc; }
-        .summary-value span { font-size: 14px; color: #64748b; font-weight: 400; }
+        .summary-value { font-size: 28px; font-weight: 700; color: #1e293b; }
+        .summary-value span { font-size: 14px; color: #94a3b8; font-weight: 400; }
 
         /* Chart */
         .chart-section { padding: 28px; margin-bottom: 24px; }
         .chart-container { position: relative; height: 300px; }
 
         /* Footer */
-        .footer { text-align: center; padding: 20px; color: #475569; font-size: 13px; }
-        .footer a { color: #3b82f6; text-decoration: none; }
+        .footer { text-align: center; padding: 20px; color: #94a3b8; font-size: 13px; }
+        .footer a { color: #2563eb; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
 
         @media (max-width: 768px) {
             .summary-grid { grid-template-columns: 1fr; }
@@ -294,26 +298,26 @@ def demo():
         let chart = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+            Chart.defaults.color = '#64748b';
+            Chart.defaults.borderColor = 'rgba(0,0,0,0.05)';
             const ctx = document.getElementById('mainChart').getContext('2d');
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: chartData.labels,
                     datasets: [
-                        { label: 'Actual Rate (GPD)', data: chartData.actual, borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.1)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f87171' },
-                        { label: 'Recommended Rate (GPD)', data: chartData.recommended, borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.1)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#4ade80' }
+                        { label: 'Actual Rate (GPD)', data: chartData.actual, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.08)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#dc2626' },
+                        { label: 'Recommended Rate (GPD)', data: chartData.recommended, borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#16a34a' }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#64748b' } },
                         x: { grid: { display: false }, ticks: { color: '#64748b' } }
                     },
-                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } } }
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20, color: '#475569' } } }
                 }
             });
         });
