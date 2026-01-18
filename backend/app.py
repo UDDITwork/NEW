@@ -115,8 +115,9 @@ def demo():
             .kpi-label { font-size: 12px; color: #a0a0a0; margin-top: 5px; }
             .status { padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 15px; }
             .status.optimal { background: #166534; color: #4ade80; }
-            .status.over { background: #7c2d12; color: #fb923c; }
-            .status.under { background: #1e3a5f; color: #60a5fa; }
+            .status.overdosing { background: #7c2d12; color: #fb923c; }
+            .status.underdosing { background: #1e3a5f; color: #60a5fa; }
+            .status.pumpoff { background: #333; color: #a0a0a0; }
             .status.idle { background: #333; color: #a0a0a0; }
             .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333; }
             .detail-label { color: #a0a0a0; }
@@ -227,41 +228,48 @@ def demo():
                     });
 
                     const result = await response.json();
+                    console.log('API Response:', result);
 
                     if (result.success) {
                         const r = result.result;
 
-                        document.getElementById('recommended_rate').textContent = r.recommended_rate.toFixed(2);
-                        document.getElementById('daily_chemical').textContent = r.daily_chemical_volume.toFixed(2);
-                        document.getElementById('daily_cost').textContent = '$' + r.daily_cost.toFixed(2);
-                        document.getElementById('water_volume').textContent = r.water_volume_lbs.toFixed(0);
+                        // API returns: recommended_rate_gpd, actual_rate_gpd, savings_opportunity_usd,
+                        // status_flag, water_bpd, current_ppm, target_ppm
+                        document.getElementById('recommended_rate').textContent = r.recommended_rate_gpd.toFixed(2);
+                        document.getElementById('daily_chemical').textContent = r.recommended_rate_gpd.toFixed(2);
+                        document.getElementById('daily_cost').textContent = '$' + (r.recommended_rate_gpd * 10).toFixed(2);
+                        document.getElementById('water_volume').textContent = r.water_bpd.toFixed(0);
 
-                        document.getElementById('current_rate_display').textContent = data.current_injection_rate.toFixed(2) + ' GPH';
+                        document.getElementById('current_rate_display').textContent = r.actual_rate_gpd.toFixed(2) + ' GPD';
 
-                        const diff = r.recommended_rate - data.current_injection_rate;
+                        const diff = r.recommended_rate_gpd - r.actual_rate_gpd;
                         const diffEl = document.getElementById('rate_diff');
-                        diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' GPH';
-                        diffEl.className = 'detail-value ' + (diff >= 0 ? 'loss' : 'savings');
+                        diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' GPD';
+                        diffEl.className = 'detail-value ' + (diff > 0 ? 'loss' : 'savings');
 
-                        const impact = r.potential_daily_savings;
+                        const impact = r.savings_opportunity_usd;
                         const impactEl = document.getElementById('financial_impact');
-                        if (impact >= 0) {
-                            impactEl.textContent = '+$' + impact.toFixed(2) + '/day savings';
+                        if (impact > 0) {
+                            impactEl.textContent = '+$' + impact.toFixed(2) + '/day (over-dosing)';
                             impactEl.className = 'detail-value savings';
-                        } else {
-                            impactEl.textContent = '-$' + Math.abs(impact).toFixed(2) + '/day needed';
+                        } else if (impact < 0) {
+                            impactEl.textContent = '-$' + Math.abs(impact).toFixed(2) + '/day (under-dosing)';
                             impactEl.className = 'detail-value loss';
+                        } else {
+                            impactEl.textContent = '$0.00/day (optimal)';
+                            impactEl.className = 'detail-value';
                         }
 
                         const statusBox = document.getElementById('status_box');
-                        statusBox.className = 'status ' + r.status.toLowerCase().replace('-', '');
+                        const statusClass = r.status_flag.toLowerCase().replace('_', '');
+                        statusBox.className = 'status ' + statusClass;
                         const statusMessages = {
                             'OPTIMAL': '✅ OPTIMAL - Current dosing is within target range',
-                            'OVER-DOSING': '⚠️ OVER-DOSING - Reduce injection rate to save costs',
-                            'UNDER-DOSING': '🔵 UNDER-DOSING - Increase injection rate for protection',
-                            'PUMP-OFF': '⏸️ PUMP OFF - No production detected'
+                            'OVER_DOSING': '⚠️ OVER-DOSING - Reduce injection rate to save costs',
+                            'UNDER_DOSING': '🔵 UNDER-DOSING - Increase injection rate for protection',
+                            'PUMP_OFF': '⏸️ PUMP OFF - No production detected'
                         };
-                        statusBox.textContent = statusMessages[r.status] || r.status;
+                        statusBox.textContent = statusMessages[r.status_flag] || r.status_flag;
                     } else {
                         alert('Error: ' + result.error);
                     }
