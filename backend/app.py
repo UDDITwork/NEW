@@ -110,10 +110,24 @@ def demo():
         .container { max-width: 1400px; margin: 0 auto; }
 
         /* Header */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
         .logo { font-size: 24px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
         .logo span { color: #2563eb; }
         .header-badge { background: rgba(37, 99, 235, 0.1); color: #2563eb; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid rgba(37, 99, 235, 0.2); }
+        .dev-profile { display: flex; align-items: center; gap: 12px; }
+        .dev-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; }
+        .dev-info { text-align: right; }
+        .dev-name { font-size: 14px; font-weight: 600; color: #1e293b; }
+        .dev-title { font-size: 11px; color: #64748b; line-height: 1.3; }
+        .dev-links { display: flex; gap: 8px; margin-top: 4px; justify-content: flex-end; }
+        .dev-link { font-size: 10px; color: #2563eb; text-decoration: none; padding: 2px 8px; background: rgba(37,99,235,0.08); border-radius: 10px; }
+        .dev-link:hover { background: rgba(37,99,235,0.15); }
+        @media (max-width: 600px) {
+            .dev-info { text-align: left; }
+            .dev-links { justify-content: flex-start; }
+            .dev-title { max-width: 180px; }
+        }
 
         /* Glass Card */
         .glass {
@@ -207,8 +221,21 @@ def demo():
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">Chemical<span>Saver</span></div>
-            <div class="header-badge">Live Demo</div>
+            <div class="header-left">
+                <div class="logo">Chemical<span>Saver</span></div>
+                <div class="header-badge">Live Demo</div>
+            </div>
+            <div class="dev-profile">
+                <div class="dev-info">
+                    <div class="dev-name">Prabhat</div>
+                    <div class="dev-title">IIT(ISM) Dhanbad | RGIPT | PE'27</div>
+                    <div class="dev-links">
+                        <a href="https://www.linkedin.com/in/prabhat-0043ba290" target="_blank" class="dev-link">LinkedIn</a>
+                        <a href="https://prabhatpetro-build-ilpm.bolt.host/" target="_blank" class="dev-link">Portfolio</a>
+                    </div>
+                </div>
+                <img src="https://media.licdn.com/dms/image/v2/D5603AQHDawzZI4DdUw/profile-displayphoto-crop_800_800/B56ZqDEXo1JoAI-/0/1763135554903?e=1770249600&v=beta&t=AJw__c4gwVJX58Ratf_RCPCr02rBW19l08MnYtG-oJY" alt="Prabhat" class="dev-avatar">
+            </div>
         </div>
 
         <div class="kpi-grid">
