@@ -4,8 +4,17 @@ Developer: PRABHAT
 """
 
 import os
+import json
+import hashlib
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+
+try:
+    import httpx
+    HTTPX_AVAILABLE = True
+except ImportError:
+    HTTPX_AVAILABLE = False
 
 from backend.lambda_function import (
     ChemicalOptimizer,
@@ -19,6 +28,40 @@ CORS(app)
 
 # In-memory settings storage (replace with database in production)
 settings_store = {}
+
+# Chat rate limiter: {user_hash: {'count': int, 'reset_time': datetime}}
+chat_rate_limits = {}
+CHAT_RATE_LIMIT = 8  # Max messages per session
+
+# Anthropic API Configuration
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+
+# System prompt for the chatbot - project-specific knowledge only
+CHATBOT_SYSTEM_PROMPT = """You are the Chemical Saver Assistant, an AI helper created by Prabhat for the Chemical Saver application.
+
+IMPORTANT RULES:
+1. You can ONLY discuss topics related to the Chemical Saver project, oil & gas chemical dosing, and related technical concepts.
+2. If anyone asks who made you or created you, respond: "My master Prabhat has created me and this entire Chemical Saver project."
+3. If someone asks anything outside the project scope (personal questions, general chat, unrelated topics), politely decline and say you can only assist with Chemical Saver related queries.
+4. Be professional, concise, and helpful.
+
+PROJECT KNOWLEDGE:
+- Chemical Saver is a dosage optimization application for oil & gas production
+- It calculates optimal chemical injection rates based on real-time production data
+- Key inputs: Gross Fluid Rate (BPD), Water Cut (%), Current Injection Rate (GPD)
+- Key outputs: Recommended Rate, Savings/Waste ($), Corrosion Risk, PPM levels
+- The app uses PPM (parts per million) calculations to determine optimal dosing
+- Target PPM is typically 200 for corrosion inhibitors
+- Status flags: OPTIMAL, OVER_DOSING, UNDER_DOSING, PUMP_OFF
+- Over-dosing wastes money, Under-dosing risks corrosion damage
+- The formula converts water volume to chemical requirements based on target concentration
+
+DEVELOPER INFO:
+- Created by: Prabhat
+- Affiliation: IIT(ISM) Dhanbad | RGIPT | PE'27
+- This is a production-grade application deployed on Google Cloud Run
+
+Keep responses brief (2-4 sentences max) and focused on helping users understand the Chemical Saver application."""
 
 
 @app.route('/', methods=['GET'])
@@ -216,6 +259,220 @@ def demo():
             .summary-grid { grid-template-columns: 1fr; }
             .btn-group { flex-direction: column; }
             .btn { width: 100%; justify-content: center; }
+        }
+
+        /* Floating Chatbot Styles */
+        .chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .chat-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 28px rgba(37, 99, 235, 0.5);
+        }
+        .chat-fab svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+        .chat-fab.active {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        /* Chat Popup Window */
+        .chat-popup {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 380px;
+            max-width: calc(100vw - 48px);
+            height: 500px;
+            max-height: calc(100vh - 140px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+        }
+        .chat-popup.active {
+            display: flex;
+            animation: chatSlideIn 0.3s ease;
+        }
+        @keyframes chatSlideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-header-avatar svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        .chat-header-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .chat-header-info p {
+            font-size: 11px;
+            opacity: 0.85;
+        }
+        .chat-remaining {
+            margin-left: auto;
+            font-size: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chat-message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .chat-message.bot {
+            background: #f1f5f9;
+            color: #1e293b;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-message.user {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .chat-typing {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-typing span {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .chat-input:focus {
+            border-color: #2563eb;
+        }
+        .chat-input:disabled {
+            background: #f8fafc;
+            cursor: not-allowed;
+        }
+        .chat-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .chat-send:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        .chat-send:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .chat-send svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        @media (max-width: 480px) {
+            .chat-popup {
+                right: 12px;
+                bottom: 90px;
+                width: calc(100vw - 24px);
+                height: calc(100vh - 120px);
+            }
+            .chat-fab {
+                right: 16px;
+                bottom: 16px;
+            }
         }
     </style>
 </head>
@@ -437,7 +694,152 @@ def demo():
             chart.data.labels = []; chart.data.datasets[0].data = []; chart.data.datasets[1].data = [];
             chart.update();
         }
+
+        // ==================== CHATBOT FUNCTIONALITY ====================
+        let chatOpen = false;
+        let chatSessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+        let remainingMessages = 8;
+        let isTyping = false;
+
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            const popup = document.getElementById('chat-popup');
+            const fab = document.getElementById('chat-fab');
+
+            if (chatOpen) {
+                popup.classList.add('active');
+                fab.classList.add('active');
+                fab.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+                document.getElementById('chat-input').focus();
+            } else {
+                popup.classList.remove('active');
+                fab.classList.remove('active');
+                fab.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>';
+            }
+        }
+
+        function addChatMessage(text, type) {
+            const messagesDiv = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message ' + type;
+            msgDiv.textContent = text;
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesDiv = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'chat-typing';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingDiv = document.getElementById('typing-indicator');
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function updateRemainingMessages(count) {
+            remainingMessages = count;
+            document.getElementById('chat-remaining').textContent = count + ' messages left';
+            if (count <= 0) {
+                document.getElementById('chat-input').disabled = true;
+                document.getElementById('chat-send').disabled = true;
+                document.getElementById('chat-input').placeholder = 'Message limit reached';
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+
+            if (!message || isTyping || remainingMessages <= 0) return;
+
+            input.value = '';
+            addChatMessage(message, 'user');
+
+            isTyping = true;
+            showTypingIndicator();
+            document.getElementById('chat-send').disabled = true;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, session_id: chatSessionId })
+                });
+
+                const data = await response.json();
+                hideTypingIndicator();
+
+                if (data.success) {
+                    addChatMessage(data.response, 'bot');
+                    if (data.remaining_messages !== undefined) {
+                        updateRemainingMessages(data.remaining_messages);
+                    }
+                } else if (data.rate_limited) {
+                    addChatMessage(data.error, 'error');
+                    updateRemainingMessages(0);
+                } else {
+                    addChatMessage('Sorry, something went wrong. Please try again.', 'error');
+                }
+            } catch (err) {
+                hideTypingIndicator();
+                addChatMessage('Unable to connect. Please check your connection.', 'error');
+            }
+
+            isTyping = false;
+            if (remainingMessages > 0) {
+                document.getElementById('chat-send').disabled = false;
+            }
+        }
+
+        function handleChatKeypress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        // Initialize chat with welcome message
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const messagesDiv = document.getElementById('chat-messages');
+                if (messagesDiv && messagesDiv.children.length === 0) {
+                    addChatMessage("Hello! I'm the Chemical Saver Assistant, created by my master Prabhat. I can help you understand this dosage optimization application. What would you like to know?", 'bot');
+                }
+            }, 500);
+        });
     </script>
+
+    <!-- Floating Chat Button -->
+    <button class="chat-fab" id="chat-fab" onclick="toggleChat()" title="Chat with AI Assistant">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+    </button>
+
+    <!-- Chat Popup Window -->
+    <div class="chat-popup" id="chat-popup">
+        <div class="chat-header">
+            <div class="chat-header-avatar">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            </div>
+            <div class="chat-header-info">
+                <h4>Chemical Saver Assistant</h4>
+                <p>Powered by Claude AI</p>
+            </div>
+            <div class="chat-remaining" id="chat-remaining">8 messages left</div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Ask about Chemical Saver..." onkeypress="handleChatKeypress(event)">
+            <button class="chat-send" id="chat-send" onclick="sendChatMessage()">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
 </body>
 </html>
     ''', 200
@@ -580,6 +982,109 @@ def batch_optimize():
             'processed': len(results),
             'results': results
         }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """
+    AI Chatbot endpoint using Anthropic Claude API.
+    Rate limited to 8 messages per user session.
+    """
+    try:
+        data = request.get_json()
+        message = data.get('message', '').strip()
+        session_id = data.get('session_id', '')
+
+        if not message:
+            return jsonify({'success': False, 'error': 'Message is required'}), 400
+
+        # Generate user hash for rate limiting
+        user_ip = request.remote_addr or 'unknown'
+        user_hash = hashlib.md5(f"{user_ip}:{session_id}".encode()).hexdigest()
+
+        # Check rate limit
+        now = datetime.now()
+        if user_hash in chat_rate_limits:
+            user_limit = chat_rate_limits[user_hash]
+            # Reset if more than 1 hour passed
+            if now > user_limit['reset_time']:
+                chat_rate_limits[user_hash] = {'count': 0, 'reset_time': now + timedelta(hours=1)}
+            elif user_limit['count'] >= CHAT_RATE_LIMIT:
+                remaining = int((user_limit['reset_time'] - now).total_seconds() / 60)
+                return jsonify({
+                    'success': False,
+                    'error': f'Rate limit exceeded. You can send {CHAT_RATE_LIMIT} messages per session. Please try again in {remaining} minutes.',
+                    'rate_limited': True
+                }), 429
+        else:
+            chat_rate_limits[user_hash] = {'count': 0, 'reset_time': now + timedelta(hours=1)}
+
+        # Increment message count
+        chat_rate_limits[user_hash]['count'] += 1
+        remaining_messages = CHAT_RATE_LIMIT - chat_rate_limits[user_hash]['count']
+
+        # Check if API key is configured
+        if not ANTHROPIC_API_KEY:
+            return jsonify({
+                'success': True,
+                'response': "I'm the Chemical Saver Assistant. The AI service is currently being configured. Please check back later or contact Prabhat for assistance.",
+                'remaining_messages': remaining_messages
+            }), 200
+
+        # Call Anthropic API
+        if not HTTPX_AVAILABLE:
+            return jsonify({
+                'success': True,
+                'response': "I'm the Chemical Saver Assistant. My master Prabhat has created me to help you with this dosage optimization application. How can I assist you with Chemical Saver today?",
+                'remaining_messages': remaining_messages
+            }), 200
+
+        try:
+            with httpx.Client(timeout=30.0) as client:
+                response = client.post(
+                    'https://api.anthropic.com/v1/messages',
+                    headers={
+                        'Content-Type': 'application/json',
+                        'x-api-key': ANTHROPIC_API_KEY,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    json={
+                        'model': 'claude-sonnet-4-20250514',
+                        'max_tokens': 300,
+                        'system': CHATBOT_SYSTEM_PROMPT,
+                        'messages': [
+                            {'role': 'user', 'content': message}
+                        ]
+                    }
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    assistant_message = result['content'][0]['text']
+                    return jsonify({
+                        'success': True,
+                        'response': assistant_message,
+                        'remaining_messages': remaining_messages
+                    }), 200
+                else:
+                    return jsonify({
+                        'success': True,
+                        'response': "I apologize, I'm having trouble connecting right now. Please try again or contact Prabhat for assistance with Chemical Saver.",
+                        'remaining_messages': remaining_messages
+                    }), 200
+
+        except Exception as api_error:
+            return jsonify({
+                'success': True,
+                'response': "I'm the Chemical Saver Assistant created by my master Prabhat. I can help you understand this dosage optimization application for oil & gas production. What would you like to know?",
+                'remaining_messages': remaining_messages
+            }), 200
 
     except Exception as e:
         return jsonify({
