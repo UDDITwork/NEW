@@ -380,6 +380,25 @@ def demo():
             color: #1e293b;
             align-self: flex-start;
             border-bottom-left-radius: 4px;
+            text-align: left;
+        }
+        .chat-message.bot p {
+            margin: 0 0 8px 0;
+            text-align: justify;
+        }
+        .chat-message.bot p:last-child {
+            margin-bottom: 0;
+        }
+        .chat-message.bot strong {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        .chat-message.bot ul, .chat-message.bot ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        .chat-message.bot li {
+            margin: 4px 0;
         }
         .chat-message.user {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -718,11 +737,59 @@ def demo():
             }
         }
 
+        function parseMarkdown(text) {
+            // Convert markdown to HTML
+            let html = text;
+
+            // Convert **bold** to <strong>
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+            // Convert *italic* to <em>
+            html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+            // Convert bullet points (- item) to list items
+            const lines = html.split('\n');
+            let inList = false;
+            let result = [];
+
+            for (let line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                    if (!inList) {
+                        result.push('<ul>');
+                        inList = true;
+                    }
+                    result.push('<li>' + trimmed.substring(2) + '</li>');
+                } else {
+                    if (inList) {
+                        result.push('</ul>');
+                        inList = false;
+                    }
+                    if (trimmed) {
+                        result.push('<p>' + trimmed + '</p>');
+                    }
+                }
+            }
+            if (inList) {
+                result.push('</ul>');
+            }
+
+            return result.join('');
+        }
+
         function addChatMessage(text, type) {
             const messagesDiv = document.getElementById('chat-messages');
             const msgDiv = document.createElement('div');
             msgDiv.className = 'chat-message ' + type;
-            msgDiv.textContent = text;
+
+            if (type === 'bot') {
+                // Parse markdown for bot messages
+                msgDiv.innerHTML = parseMarkdown(text);
+            } else {
+                // Keep plain text for user messages
+                msgDiv.textContent = text;
+            }
+
             messagesDiv.appendChild(msgDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
