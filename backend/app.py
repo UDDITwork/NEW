@@ -156,8 +156,9 @@ def demo():
         .kpi-sub { font-size: 12px; color: #94a3b8; }
 
         /* Status Banner */
-        .status-banner { padding: 20px; margin-bottom: 24px; text-align: center; }
-        .status-text { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; }
+        .status-wrapper { text-align: center; margin-bottom: 24px; }
+        .status-banner { padding: 12px 28px; display: inline-block; }
+        .status-text { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
         .status-banner.optimal { background: rgba(22, 163, 74, 0.08); border-color: rgba(22, 163, 74, 0.2); }
         .status-banner.optimal .status-text { color: #16a34a; }
         .status-banner.over { background: rgba(220, 38, 38, 0.08); border-color: rgba(220, 38, 38, 0.2); }
@@ -261,8 +262,10 @@ def demo():
             </div>
         </div>
 
-        <div class="glass status-banner off" id="status-banner">
-            <div class="status-text" id="status-text">Enter production data and click Calculate</div>
+        <div class="status-wrapper">
+            <div class="glass status-banner off" id="status-banner">
+                <div class="status-text" id="status-text">Enter production data and click Calculate</div>
+            </div>
         </div>
 
         <div class="glass input-section">
