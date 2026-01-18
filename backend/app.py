@@ -21,6 +21,67 @@ CORS(app)
 settings_store = {}
 
 
+@app.route('/', methods=['GET'])
+def home():
+    """Home page with API documentation."""
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Chemical Saver API</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+            h1 { color: #2e7d32; }
+            .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; }
+            code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }
+            .method { color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+            .get { background: #4caf50; }
+            .post { background: #2196f3; }
+        </style>
+    </head>
+    <body>
+        <h1>🧪 Chemical Saver API</h1>
+        <p>Dosage Optimization for Oil & Gas Production</p>
+
+        <h2>API Endpoints</h2>
+
+        <div class="endpoint">
+            <span class="method get">GET</span> <code>/health</code>
+            <p>Health check endpoint</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span> <code>/api/optimize</code>
+            <p>Calculate optimal chemical injection rate</p>
+            <pre>{
+  "asset_id": "well123",
+  "gross_fluid_rate": 1000,
+  "water_cut": 80,
+  "current_injection_rate": 5.0
+}</pre>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span> <code>/api/batch</code>
+            <p>Batch optimization for multiple records</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span> <code>/api/settings/{asset_id}</code>
+            <p>Get settings for an asset</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span> <code>/api/settings/{asset_id}</code>
+            <p>Save settings for an asset</p>
+        </div>
+
+        <p><strong>Developer:</strong> PRABHAT</p>
+    </body>
+    </html>
+    ''', 200
+
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint for Cloud Run."""
