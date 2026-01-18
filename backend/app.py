@@ -7,7 +7,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from lambda_function import (
+from backend.lambda_function import (
     ChemicalOptimizer,
     WellSettings,
     ProductionData,
