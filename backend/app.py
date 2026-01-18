@@ -88,166 +88,204 @@ def home():
 
 @app.route('/demo', methods=['GET'])
 def demo():
-    """Interactive demo page - Easy to use for everyone."""
+    """Interactive demo page - Professional glassmorphism UI."""
     return '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chemical Saver - Live Demo</title>
+    <title>Chemical Saver | Dosage Optimization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            padding: 24px;
+        }
         .container { max-width: 1400px; margin: 0 auto; }
-        h1 { color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .badge { background: #4caf50; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .logo { font-size: 24px; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; }
+        .logo span { color: #3b82f6; }
+        .header-badge { background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+        /* Glass Card */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
 
         /* KPI Cards */
-        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .kpi-card { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #9e9e9e; }
-        .kpi-card.error { border-left-color: #f44336; }
-        .kpi-card.warning { border-left-color: #ff9800; }
-        .kpi-card.success { border-left-color: #4caf50; }
-        .kpi-card.info { border-left-color: #2196f3; }
-        .kpi-title { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 8px; }
-        .kpi-value { font-size: 28px; font-weight: 700; }
-        .kpi-card.error .kpi-value { color: #f44336; }
-        .kpi-card.warning .kpi-value { color: #ff9800; }
-        .kpi-card.success .kpi-value { color: #4caf50; }
-        .kpi-card.info .kpi-value { color: #2196f3; }
-        .kpi-subtitle { font-size: 12px; color: #999; margin-top: 4px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { padding: 24px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .kpi-card.success::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .kpi-card.warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .kpi-card.error::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .kpi-card.info::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 8px; font-weight: 500; }
+        .kpi-value { font-size: 32px; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+        .kpi-card.success .kpi-value { color: #4ade80; }
+        .kpi-card.warning .kpi-value { color: #fbbf24; }
+        .kpi-card.error .kpi-value { color: #f87171; }
+        .kpi-card.info .kpi-value { color: #60a5fa; }
+        .kpi-sub { font-size: 12px; color: #64748b; }
 
-        /* Status */
-        .status-indicator { text-align: center; padding: 16px; margin-bottom: 24px; }
-        .status-chip { display: inline-block; padding: 12px 32px; border-radius: 25px; font-weight: 600; font-size: 16px; }
-        .status-optimal { background: #e8f5e9; color: #2e7d32; }
-        .status-over { background: #ffebee; color: #c62828; }
-        .status-under { background: #fff3e0; color: #ef6c00; }
-        .status-off { background: #f5f5f5; color: #757575; }
+        /* Status Banner */
+        .status-banner { padding: 20px; margin-bottom: 24px; text-align: center; }
+        .status-text { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; }
+        .status-banner.optimal { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+        .status-banner.optimal .status-text { color: #4ade80; }
+        .status-banner.over { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        .status-banner.over .status-text { color: #f87171; }
+        .status-banner.under { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
+        .status-banner.under .status-text { color: #fbbf24; }
+        .status-banner.off { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); }
+        .status-banner.off .status-text { color: #94a3b8; }
 
-        /* Input Panel */
-        .input-panel { background: white; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .input-panel h3 { margin-bottom: 16px; color: #333; }
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-size: 14px; color: #333; font-weight: 600; }
-        .input-group input { padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .input-group input:focus { outline: none; border-color: #1976d2; }
-        .input-group .unit { font-size: 12px; color: #666; }
+        /* Input Section */
+        .input-section { padding: 28px; margin-bottom: 24px; }
+        .section-title { font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: 500; }
+        .input-group input {
+            width: 100%; padding: 14px 16px; font-size: 16px; font-weight: 500;
+            background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px; color: #f8fafc; transition: all 0.2s;
+        }
+        .input-group input:focus { outline: none; border-color: #3b82f6; background: rgba(15, 23, 42, 0.8); }
+        .input-group .unit { font-size: 11px; color: #64748b; margin-top: 6px; }
 
         /* Buttons */
-        .btn { padding: 14px 28px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: #1976d2; color: white; }
-        .btn-primary:hover { background: #1565c0; }
-        .btn-success { background: #4caf50; color: white; }
-        .btn-success:hover { background: #43a047; }
-        .btn-danger { background: #f44336; color: white; }
-        .btn-secondary { background: #e0e0e0; color: #333; }
-        .button-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); }
+        .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        /* Summary Cards */
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+        .summary-card { padding: 24px; text-align: center; }
+        .summary-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px; }
+        .summary-value { font-size: 28px; font-weight: 700; color: #f8fafc; }
+        .summary-value span { font-size: 14px; color: #64748b; font-weight: 400; }
 
         /* Chart */
-        .chart-container { background: white; border-radius: 8px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .chart-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+        .chart-section { padding: 28px; margin-bottom: 24px; }
+        .chart-container { position: relative; height: 300px; }
 
-        /* Summary */
-        .summary-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-        .summary-card { background: white; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .summary-label { font-size: 12px; color: #666; margin-bottom: 8px; text-transform: uppercase; }
-        .summary-value { font-size: 28px; font-weight: 700; color: #1976d2; }
-        .summary-unit { font-size: 14px; font-weight: 400; color: #999; }
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: #475569; font-size: 13px; }
+        .footer a { color: #3b82f6; text-decoration: none; }
 
-        @media (max-width: 768px) { .summary-row { grid-template-columns: 1fr; } }
-
-        .footer { text-align: center; margin-top: 30px; color: #666; }
-        .footer a { color: #1976d2; }
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧪 Chemical Saver <span class="badge">LIVE DEMO</span></h1>
+        <div class="header">
+            <div class="logo">Chemical<span>Saver</span></div>
+            <div class="header-badge">Live Demo</div>
+        </div>
 
-        <!-- KPI Row -->
-        <div class="kpi-row">
-            <div class="kpi-card warning" id="kpi-waste">
-                <div class="kpi-title">💸 Savings/Waste</div>
+        <div class="kpi-grid">
+            <div class="glass kpi-card warning" id="kpi-waste">
+                <div class="kpi-label">Daily Savings / Waste</div>
                 <div class="kpi-value">$0.00</div>
-                <div class="kpi-subtitle">per day</div>
+                <div class="kpi-sub">per day</div>
             </div>
-            <div class="kpi-card success" id="kpi-corrosion">
-                <div class="kpi-title">🛡️ Corrosion Risk</div>
+            <div class="glass kpi-card success" id="kpi-corrosion">
+                <div class="kpi-label">Corrosion Risk</div>
                 <div class="kpi-value">--</div>
-                <div class="kpi-subtitle">Protection level</div>
+                <div class="kpi-sub">Protection status</div>
             </div>
-            <div class="kpi-card info" id="kpi-ppm">
-                <div class="kpi-title">🧪 Current PPM</div>
+            <div class="glass kpi-card info" id="kpi-ppm">
+                <div class="kpi-label">Current PPM</div>
                 <div class="kpi-value">0</div>
-                <div class="kpi-subtitle">Target: 200 PPM</div>
+                <div class="kpi-sub">Target: 200 PPM</div>
             </div>
-            <div class="kpi-card info" id="kpi-water">
-                <div class="kpi-title">💧 Water Production</div>
+            <div class="glass kpi-card info" id="kpi-water">
+                <div class="kpi-label">Water Production</div>
                 <div class="kpi-value">0</div>
-                <div class="kpi-subtitle">BPD</div>
+                <div class="kpi-sub">Barrels per day</div>
             </div>
         </div>
 
-        <!-- Status -->
-        <div class="status-indicator">
-            <span class="status-chip status-off" id="status-chip">⏸ Enter Data & Click Calculate</span>
+        <div class="glass status-banner off" id="status-banner">
+            <div class="status-text" id="status-text">Enter production data and click Calculate</div>
         </div>
 
-        <!-- Input Panel -->
-        <div class="input-panel">
-            <h3>📊 Enter Production Data</h3>
+        <div class="glass input-section">
+            <div class="section-title">Production Data Input</div>
             <div class="input-grid">
                 <div class="input-group">
                     <label>Gross Fluid Rate</label>
                     <input type="number" id="sim-fluid" value="1000" min="0">
-                    <span class="unit">BPD (Barrels Per Day)</span>
+                    <div class="unit">BPD (Barrels Per Day)</div>
                 </div>
                 <div class="input-group">
                     <label>Water Cut</label>
                     <input type="number" id="sim-watercut" value="75" min="0" max="100">
-                    <span class="unit">% (0-100)</span>
+                    <div class="unit">Percentage (0-100)</div>
                 </div>
                 <div class="input-group">
                     <label>Current Injection Rate</label>
                     <input type="number" id="sim-injection" value="5.0" step="0.1" min="0">
-                    <span class="unit">GPD (Gallons Per Day)</span>
+                    <div class="unit">GPD (Gallons Per Day)</div>
                 </div>
             </div>
-            <div class="button-row">
-                <button class="btn btn-primary" onclick="runOptimization()">⚡ Calculate Optimal Rate</button>
-                <button class="btn btn-success" onclick="startAutoSimulation()">🔄 Auto Demo</button>
-                <button class="btn btn-danger" onclick="stopAutoSimulation()">⏹ Stop</button>
-                <button class="btn btn-secondary" onclick="clearData()">🗑 Clear</button>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="runOptimization()">Calculate Optimal Rate</button>
+                <button class="btn btn-success" onclick="startAutoSimulation()">Auto Simulation</button>
+                <button class="btn btn-danger" onclick="stopAutoSimulation()">Stop</button>
+                <button class="btn btn-secondary" onclick="clearData()">Clear Data</button>
             </div>
         </div>
 
-        <!-- Summary Row -->
-        <div class="summary-row">
-            <div class="summary-card">
+        <div class="summary-grid">
+            <div class="glass summary-card">
                 <div class="summary-label">Recommended Rate</div>
-                <div class="summary-value" id="rec-rate">0.00 <span class="summary-unit">GPD</span></div>
+                <div class="summary-value" id="rec-rate">0.00 <span>GPD</span></div>
             </div>
-            <div class="summary-card">
+            <div class="glass summary-card">
                 <div class="summary-label">Actual Rate</div>
-                <div class="summary-value" id="act-rate">0.00 <span class="summary-unit">GPD</span></div>
+                <div class="summary-value" id="act-rate">0.00 <span>GPD</span></div>
             </div>
-            <div class="summary-card">
+            <div class="glass summary-card">
                 <div class="summary-label">Rate Difference</div>
-                <div class="summary-value" id="rate-diff">0.00 <span class="summary-unit">GPD</span></div>
+                <div class="summary-value" id="rate-diff">0.00 <span>GPD</span></div>
             </div>
         </div>
 
-        <!-- Chart -->
-        <div class="chart-container">
-            <div class="chart-title">📈 Injection Rate Comparison (Actual vs Recommended)</div>
-            <canvas id="mainChart" height="100"></canvas>
+        <div class="glass chart-section">
+            <div class="section-title">Injection Rate Comparison</div>
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+            </div>
         </div>
 
-        <p class="footer">Developer: <strong>PRABHAT</strong> | <a href="/">API Documentation</a></p>
+        <div class="footer">
+            Developed by <strong>PRABHAT</strong> | <a href="/">API Documentation</a>
+        </div>
     </div>
 
     <script>
@@ -255,27 +293,31 @@ def demo():
         let autoSimInterval = null;
         let chart = null;
 
-        // Initialize chart
         document.addEventListener('DOMContentLoaded', function() {
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
             const ctx = document.getElementById('mainChart').getContext('2d');
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: chartData.labels,
                     datasets: [
-                        { label: 'Actual Rate (GPD)', data: chartData.actual, borderColor: '#f44336', backgroundColor: 'rgba(244, 67, 54, 0.1)', tension: 0.3, fill: false, borderWidth: 3 },
-                        { label: 'Recommended Rate (GPD)', data: chartData.recommended, borderColor: '#4caf50', backgroundColor: 'rgba(76, 175, 80, 0.1)', tension: 0.3, fill: false, borderWidth: 3 }
+                        { label: 'Actual Rate (GPD)', data: chartData.actual, borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.1)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f87171' },
+                        { label: 'Recommended Rate (GPD)', data: chartData.recommended, borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.1)', tension: 0.4, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#4ade80' }
                     ]
                 },
                 options: {
                     responsive: true,
-                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Injection Rate (GPD)' } } },
-                    plugins: { legend: { position: 'top' } }
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } } }
                 }
             });
         });
 
-        // Run optimization - calls the LIVE API
         async function runOptimization() {
             const grossFluid = parseFloat(document.getElementById('sim-fluid').value) || 0;
             const waterCut = parseFloat(document.getElementById('sim-watercut').value) || 0;
@@ -285,96 +327,62 @@ def demo():
                 const response = await fetch('/api/optimize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        asset_id: 'demo',
-                        gross_fluid_rate: grossFluid,
-                        water_cut: waterCut,
-                        current_injection_rate: injection
-                    })
+                    body: JSON.stringify({ asset_id: 'demo', gross_fluid_rate: grossFluid, water_cut: waterCut, current_injection_rate: injection })
                 });
-
                 const data = await response.json();
-                console.log('API Response:', data);
-
-                if (data.success) {
-                    updateDashboard(data.result);
-                    updateChart(data.result);
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (err) {
-                alert('API Error: ' + err.message);
-            }
+                if (data.success) { updateDashboard(data.result); updateChart(data.result); }
+                else { console.error('Error:', data.error); }
+            } catch (err) { console.error('API Error:', err.message); }
         }
 
-        // Update dashboard
         function updateDashboard(r) {
-            // Savings/Waste KPI
             const wasteCard = document.getElementById('kpi-waste');
             const savingsVal = Math.abs(r.savings_opportunity_usd);
             wasteCard.querySelector('.kpi-value').textContent = '$' + savingsVal.toFixed(2);
             wasteCard.classList.remove('error', 'success', 'warning');
-            if (r.savings_opportunity_usd > 1) {
-                wasteCard.classList.add('error');
-                wasteCard.querySelector('.kpi-subtitle').textContent = 'wasting (over-dosing)';
-            } else if (r.savings_opportunity_usd < -1) {
-                wasteCard.classList.add('warning');
-                wasteCard.querySelector('.kpi-subtitle').textContent = 'needed (under-dosing)';
-            } else {
-                wasteCard.classList.add('success');
-                wasteCard.querySelector('.kpi-subtitle').textContent = 'optimal';
-            }
+            if (r.savings_opportunity_usd > 1) { wasteCard.classList.add('error'); wasteCard.querySelector('.kpi-sub').textContent = 'Wasting (over-dosing)'; }
+            else if (r.savings_opportunity_usd < -1) { wasteCard.classList.add('warning'); wasteCard.querySelector('.kpi-sub').textContent = 'Additional cost needed'; }
+            else { wasteCard.classList.add('success'); wasteCard.querySelector('.kpi-sub').textContent = 'Optimal dosing'; }
 
-            // Corrosion Risk
             const corrosionCard = document.getElementById('kpi-corrosion');
             const isHighRisk = r.status_flag === 'UNDER_DOSING' || r.current_ppm < r.target_ppm * 0.9;
             corrosionCard.querySelector('.kpi-value').textContent = isHighRisk ? 'HIGH' : 'LOW';
             corrosionCard.classList.remove('error', 'success');
             corrosionCard.classList.add(isHighRisk ? 'error' : 'success');
-            corrosionCard.querySelector('.kpi-subtitle').textContent = isHighRisk ? 'Increase dosing!' : 'Good protection';
+            corrosionCard.querySelector('.kpi-sub').textContent = isHighRisk ? 'Increase dosing recommended' : 'Adequate protection';
 
-            // PPM
             document.getElementById('kpi-ppm').querySelector('.kpi-value').textContent = r.current_ppm.toFixed(0);
-            document.getElementById('kpi-ppm').querySelector('.kpi-subtitle').textContent = 'Target: ' + r.target_ppm + ' PPM';
-
-            // Water
+            document.getElementById('kpi-ppm').querySelector('.kpi-sub').textContent = 'Target: ' + r.target_ppm + ' PPM';
             document.getElementById('kpi-water').querySelector('.kpi-value').textContent = r.water_bpd.toFixed(0);
 
-            // Status chip
-            const statusChip = document.getElementById('status-chip');
-            statusChip.className = 'status-chip';
+            const banner = document.getElementById('status-banner');
+            const statusText = document.getElementById('status-text');
+            banner.classList.remove('optimal', 'over', 'under', 'off');
             const statusMap = {
-                'OPTIMAL': { class: 'status-optimal', text: '✅ OPTIMAL - Perfect dosing!' },
-                'OVER_DOSING': { class: 'status-over', text: '⚠️ OVER-DOSING - Reduce rate to save money!' },
-                'UNDER_DOSING': { class: 'status-under', text: '🔶 UNDER-DOSING - Increase rate for protection!' },
-                'PUMP_OFF': { class: 'status-off', text: '⏸ PUMP OFF - No production' }
+                'OPTIMAL': { class: 'optimal', text: 'OPTIMAL - Dosing within target range' },
+                'OVER_DOSING': { class: 'over', text: 'OVER-DOSING - Reduce injection rate to optimize costs' },
+                'UNDER_DOSING': { class: 'under', text: 'UNDER-DOSING - Increase injection rate for corrosion protection' },
+                'PUMP_OFF': { class: 'off', text: 'PUMP OFF - No production detected' }
             };
             const status = statusMap[r.status_flag] || statusMap['PUMP_OFF'];
-            statusChip.classList.add(status.class);
-            statusChip.textContent = status.text;
+            banner.classList.add(status.class);
+            statusText.textContent = status.text;
 
-            // Summary cards
-            document.getElementById('rec-rate').innerHTML = r.recommended_rate_gpd.toFixed(2) + ' <span class="summary-unit">GPD</span>';
-            document.getElementById('act-rate').innerHTML = r.actual_rate_gpd.toFixed(2) + ' <span class="summary-unit">GPD</span>';
+            document.getElementById('rec-rate').innerHTML = r.recommended_rate_gpd.toFixed(2) + ' <span>GPD</span>';
+            document.getElementById('act-rate').innerHTML = r.actual_rate_gpd.toFixed(2) + ' <span>GPD</span>';
             const diff = r.actual_rate_gpd - r.recommended_rate_gpd;
-            document.getElementById('rate-diff').innerHTML = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' <span class="summary-unit">GPD</span>';
+            document.getElementById('rate-diff').innerHTML = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' <span>GPD</span>';
         }
 
-        // Update chart
         function updateChart(r) {
-            const time = new Date().toLocaleTimeString();
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             chartData.labels.push(time);
             chartData.actual.push(r.actual_rate_gpd);
             chartData.recommended.push(r.recommended_rate_gpd);
-            if (chartData.labels.length > 20) {
-                chartData.labels.shift();
-                chartData.actual.shift();
-                chartData.recommended.shift();
-            }
+            if (chartData.labels.length > 15) { chartData.labels.shift(); chartData.actual.shift(); chartData.recommended.shift(); }
             chart.update();
         }
 
-        // Auto simulation
         function startAutoSimulation() {
             if (autoSimInterval) return;
             autoSimInterval = setInterval(() => {
@@ -388,15 +396,11 @@ def demo():
             }, 2000);
         }
 
-        function stopAutoSimulation() {
-            if (autoSimInterval) { clearInterval(autoSimInterval); autoSimInterval = null; }
-        }
+        function stopAutoSimulation() { if (autoSimInterval) { clearInterval(autoSimInterval); autoSimInterval = null; } }
 
         function clearData() {
             chartData = { labels: [], actual: [], recommended: [] };
-            chart.data.labels = [];
-            chart.data.datasets[0].data = [];
-            chart.data.datasets[1].data = [];
+            chart.data.labels = []; chart.data.datasets[0].data = []; chart.data.datasets[1].data = [];
             chart.update();
         }
     </script>
